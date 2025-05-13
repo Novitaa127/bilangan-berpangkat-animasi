@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bilangan Berpangkat Interaktif</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-blue-50 min-h-screen flex flex-col items-center justify-center p-6">
+  <div class="bg-white shadow-2xl rounded-2xl p-6 w-full max-w-md text-center">
+    <h1 class="text-3xl font-extrabold mb-4 text-blue-800">Bilangan Berpangkat</h1>
+    <div class="flex flex-col gap-4">
+      <input type="number" id="basis" placeholder="Masukkan basis (a)" class="border rounded-lg p-3">
+      <input type="number" id="pangkat" placeholder="Masukkan pangkat (n)" class="border rounded-lg p-3">
+      <button onclick="hitungPangkat()" class="bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800 transition">Hitung</button>
+    </div>
+    <div class="mt-6 space-y-2">
+      <p id="hasil" class="text-xl font-semibold text-gray-800"></p>
+      <p id="langkah" class="text-sm text-gray-500 mt-2"></p>
+      <p id="animLangkah" class="text-lg font-mono text-blue-600"></p>
+    </div>
+  </div>
+
+  <div class="mt-10 w-full max-w-xl">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <script>
+    let chart;
+
+    function tampilkanLangkah(a, n) {
+      const elem = document.getElementById("animLangkah");
+      let hasil = "";
+      let i = 0;
+      elem.innerText = "";
+      const interval = setInterval(() => {
+        if (i < n) {
+          hasil += a + (i < n - 1 ? " × " : "");
+          elem.innerText = hasil;
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 400);
+    }
+
+    function hitungPangkat() {
+      const a = parseInt(document.getElementById('basis').value);
+      const n = parseInt(document.getElementById('pangkat').value);
+      if (isNaN(a) || isNaN(n)) return;
+
+      const hasil = a ** n;
+      const langkah = Array(n).fill(a).join(" × ");
+      document.getElementById('hasil').innerText = `${a}^${n} = ${hasil}`;
+      document.getElementById('langkah').innerText = `Perkalian berulang: ${langkah}`;
+      tampilkanLangkah(a, n);
+
+      const labels = Array.from({length: n + 1}, (_, i) => i);
+      const data = labels.map(i => a ** i);
+
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `Pertumbuhan ${a}^x`,
+            data: data,
+            borderColor: '#1d4ed8',
+            backgroundColor: 'rgba(96,165,250,0.3)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Pangkat (x)' } },
+            y: { title: { display: true, text: 'Hasil (a^x)' }, beginAtZero: true }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
